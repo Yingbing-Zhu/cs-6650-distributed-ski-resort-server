@@ -10,10 +10,11 @@ import java.io.IOException;
 public class SkierServlet extends HttpServlet {
     private Gson gson = new Gson();
     // Create a response message
-    ResponseMsg responseMsg = new ResponseMsg();
+    private ResponseMsg responseMsg = new ResponseMsg();
 
     // handle a POST request
-    public void doPost(HttpServletRequest req, HttpServletResponse res)
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
         res.setContentType("application/json");
 
@@ -33,31 +34,28 @@ public class SkierServlet extends HttpServlet {
             responseMsg.setMessage("invalid url");
             res.getWriter().write(gson.toJson(responseMsg));
             res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        } else {
-            // Parse path parameters
-            int resortID = Integer.parseInt(urlParts[1]);
-            String seasonID = urlParts[3];
-            String dayID = urlParts[5];
-            int skierID = Integer.parseInt(urlParts[7]);
-
-            // Parse JSON body
-            LiftRide liftRide = gson.fromJson(req.getReader(), LiftRide.class);
-            if (liftRide == null) {
-                res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                return;
-            }
-            responseMsg.setMessage(String.format(
-                    "Lift ride recorded successfully: Time - %d, Lift ID - %d, Resort ID - %d, Season ID - %s, Day ID - %s, Skier ID - %d",
-                    liftRide.getTime(), liftRide.getLiftID(), resortID, seasonID, dayID, skierID
-            ));
-            res.getWriter().write(gson.toJson(responseMsg));
-            res.setStatus(HttpServletResponse.SC_CREATED);
+            return;
         }
+        // Parse JSON body
+        LiftRide liftRide = gson.fromJson(req.getReader(), LiftRide.class);
+        if (liftRide == null) {
+            res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+//        // Parse path parameters
+//        int resortID = Integer.parseInt(urlParts[1]);
+//        String seasonID = urlParts[3];
+//        String dayID = urlParts[5];
+//        int skierID = Integer.parseInt(urlParts[7]);
 
 
-
+        responseMsg.setMessage("Lift ride recorded successfully");
+        res.getWriter().write(gson.toJson(responseMsg));
+        res.setStatus(HttpServletResponse.SC_CREATED);
     }
+
     // handle a GET request
+    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         res.setContentType("application/json");
         String urlPath = req.getPathInfo();
